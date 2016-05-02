@@ -8,7 +8,7 @@ LAPTOP_DISTANCE = 2.5
 PIXEL_DISTANCE = 200
 WIDTH = 1024
 HEIGHT = 800
-TIME_THRESH = 5000.0
+TIME_THRESH = 4000.0
 alpha = 0.9
 
 class TimeAverage:
@@ -98,6 +98,7 @@ def ui_update(ts):
     x, y = (Xmap.get(mac), Ymap.get(mac))
     x_cen = int(x * PIXEL_DISTANCE / LAPTOP_DISTANCE + 40)
     y_cen = int(y * PIXEL_DISTANCE / LAPTOP_DISTANCE + HEIGHT / 2)
+    print x_cen, y_cen
     color = 'red'
     if mac[0] == 'd':
       color = 'green'
@@ -116,13 +117,14 @@ channel = connection.channel()
 channel.queue_declare(queue='6.857', durable=True)
 
 def callback(ch, method, properties, body):
-    print " [x] Received %r" % (body,)
+    #print " [x] Received %r" % (body,)
     rid, mac, dis, ts = body.split('|')
     rid = int(rid)
     dis = float(dis)
     ts = float(ts)
     global LATEST_TS
     LATEST_TS = max(LATEST_TS, ts)
+    R[rid].add(mac, dis, ts)
     #update(rid, mac, dis, ts)
     ui_update(ts)
 

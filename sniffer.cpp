@@ -98,6 +98,7 @@ int main() {
   config.set_promisc_mode(true);
   config.set_rfmon(true);
   config.set_buffer_size(80 << 20);
+  config.set_snap_len(2048);
   //config.set_filter("ether host d0:22:be:65:f4:a9");
   std::cerr << "Started!\n";
   Sniffer("en0", config).sniff_loop(callback);
