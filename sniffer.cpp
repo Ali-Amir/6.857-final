@@ -1,3 +1,5 @@
+#include <boost/date_time/posix_time/posix_time.hpp>
+
 #include <SimpleAmqpClient/BasicMessage.h>
 #include <SimpleAmqpClient/Channel.h>
 #include <SimpleAmqpClient/Util.h>
@@ -11,6 +13,9 @@ using namespace Tins;
 
 AmqpClient::Channel::ptr_t channel;
 AmqpClient::BasicMessage::ptr_t msg_in;
+const std::string LAPTOP_ID = "0";
+const std::string SEP = "|";
+boost::posix_time::ptime epoch(boost::gregorian::date(2010, 1, 1));
 
 double SignalToDistanceMeters(int dbm, int freq) {
   double exp = (27.55 - (20 * log(freq)/log(10.0)) + fabs(dbm*1.0)) / 20.0;
@@ -57,13 +62,21 @@ bool callback(const PDU &pdu) {
     std::string target_a = "38:71:de:4c:84:2d";
     std::string target_b = "d0:22:be:65:f4:a9";
     if (src == target_a || src == target_b) {
+      std::cerr << "Here!!!\n";
       double distance = SignalToDistanceMeters(strength, freq);
+
+      std::string msg_str = LAPTOP_ID + SEP +
+                            src + SEP +
+                            std::to_string(distance) + SEP +
+                            std::to_string((boost::posix_time::second_clock::local_time()-epoch).total_milliseconds());
+
+      msg_in->Body(msg_str);
+      channel->BasicPublish("amq.direct", "key", msg_in);
+
       std::cout << src << " -> " << dst
                 << " signal: " << strength
                 << " dbm. Estimated distance: "
                 << distance << " m." << std::endl;
-      msg_in->Body("0|" + src + "|" + std::to_string(distance));
-      channel->BasicPublish("amq.direct", "key", msg_in);
     }
   } catch(const field_not_present &e) {
     // Nothing 
@@ -75,7 +88,7 @@ bool callback(const PDU &pdu) {
 }
 
 int main() {
-  std::string broker_address = "18.111.42.239";
+  std::string broker_address = "18.111.117.170";
   channel = AmqpClient::Channel::Create(broker_address, 5672, "a", "a");
   channel->DeclareQueue("6.857", true);
   channel->BindQueue("6.857", "amq.direct", "key");
