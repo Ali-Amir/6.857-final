@@ -21,27 +21,49 @@ bool callback(const PDU &pdu) {
   try {
     const RadioTap *rad = pdu.find_pdu<RadioTap>();
     if (!rad) {
+      std::cerr << "No radiotap!\n";
       return true;
     }
     int strength = (int)rad->dbm_signal();
     int freq = (int)rad->channel_freq();
 
+    std::string src = "";
+    std::string dst = "";
+
+    /*
+    const Dot11ManagementFrame *dmf = pdu.find_pdu<Dot11ManagementFrame>();
+    if (dmf) {
+      src = dmf->addr2().to_string();
+      dst = dmf->addr1().to_string();
+    }
+    */
+
     const Dot11Data *dot = pdu.find_pdu<Dot11Data>();
-    if (!dot) {
+    if (dot) {
+      src = dot->src_addr().to_string();
+      dst = dot->dst_addr().to_string();
+    }
+
+    const EthernetII *eth = pdu.find_pdu<EthernetII>();
+    if (eth) {
+      src = eth->src_addr().to_string();
+      dst = eth->dst_addr().to_string();
+    }
+  
+    if (src == "" && dst == "") {
       return true;
     }
-    std::string src = dot->src_addr().to_string();
-    std::string tar = dot->dst_addr().to_string();
+
     std::string target_a = "38:71:de:4c:84:2d";
     std::string target_b = "d0:22:be:65:f4:a9";
     if (src == target_a || src == target_b) {
       double distance = SignalToDistanceMeters(strength, freq);
-      msg_in->Body("0|" + src + "|" + std::to_string(distance));
-      channel->BasicPublish("amq.direct", "key", msg_in);
-      std::cout << src << " -> " << tar
+      std::cout << src << " -> " << dst
                 << " signal: " << strength
                 << " dbm. Estimated distance: "
                 << distance << " m." << std::endl;
+      msg_in->Body("0|" + src + "|" + std::to_string(distance));
+      channel->BasicPublish("amq.direct", "key", msg_in);
     }
   } catch(const field_not_present &e) {
     // Nothing 
@@ -64,5 +86,6 @@ int main() {
   config.set_rfmon(true);
   config.set_buffer_size(80 << 20);
   //config.set_filter("ether host d0:22:be:65:f4:a9");
+  std::cerr << "Started!\n";
   Sniffer("en0", config).sniff_loop(callback);
 }
