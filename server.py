@@ -8,8 +8,8 @@ PIXEL_DISTANCE = 200
 WIDTH = 1024
 HEIGHT = 800
 
-X = defaultdict(float)
-Y = defaultdict(float)
+Xmap = defaultdict(float)
+Ymap = defaultdict(float)
 
 alpha = 0.9
 
@@ -46,7 +46,6 @@ def drawcircle(canv,x,y,rad):
 canvas = Canvas(width=WIDTH, height=HEIGHT, bg='white')
 canvas.pack(expand=YES, fill=BOTH)
 def ui_update():
-  print "entered"
   y0 = HEIGHT / 2 - PIXEL_DISTANCE / 2
   x0 = 40
   y1 = HEIGHT / 2 + PIXEL_DISTANCE / 2
@@ -59,14 +58,15 @@ def ui_update():
     if not mac in R[1]:
       continue
     x, y = intersect(R[0][mac], R[1][mac])
-    print x,y
+    rolling_update(Xmap, mac, x, alpha)
+    rolling_update(Ymap, mac, y, alpha)
+    x, y = (Xmap[mac], Ymap[mac])
     x_cen = int(x * PIXEL_DISTANCE / LAPTOP_DISTANCE + 40)
     y_cen = int(y * PIXEL_DISTANCE / LAPTOP_DISTANCE + HEIGHT / 2)
     drawcircle(canvas, x_cen, y_cen, 30)
 
   text = canvas.create_text(50,10, text="tk test")
   root.update()
-  print "exited"
 
 ######################
 ######## RABBIT_MQ ##########
