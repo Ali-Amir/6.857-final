@@ -71,8 +71,9 @@ def ui_update():
 ######################
 ######## RABBIT_MQ ##########
 ######################
+credentials = pika.PlainCredentials('guest', 'guest')
 connection = pika.BlockingConnection(pika.ConnectionParameters(
-        host='localhost'))
+        host='18.111.42.239', credentials = credentials))
 channel = connection.channel()
 channel.queue_declare(queue='6.857', durable=True)
 

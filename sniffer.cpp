@@ -36,7 +36,7 @@ bool callback(const PDU &pdu) {
     std::string target_b = "d0:22:be:65:f4:a9";
     if (src == target_a || src == target_b) {
       double distance = SignalToDistanceMeters(strength, freq);
-      msg_in->Body("1|" + src + "|" + std::to_string(distance));
+      msg_in->Body("0|" + src + "|" + std::to_string(distance));
       channel->BasicPublish("amq.direct", "key", msg_in);
       std::cout << src << " -> " << tar
                 << " signal: " << strength
@@ -54,7 +54,7 @@ bool callback(const PDU &pdu) {
 
 int main() {
   std::string broker_address = "18.111.42.239";
-  channel = AmqpClient::Channel::Create(broker_address);
+  channel = AmqpClient::Channel::Create(broker_address, 5672, "a", "a");
   channel->DeclareQueue("6.857", true);
   channel->BindQueue("6.857", "amq.direct", "key");
   msg_in = AmqpClient::BasicMessage::Create();
