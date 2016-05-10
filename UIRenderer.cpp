@@ -13,6 +13,7 @@ UIRenderer::~UIRenderer() {
 void UIRenderer::drawElements() {
   for (const auto &kv : _circles) {
     const auto &cir = kv.second;
+    std::cerr << "Drawing: " << cir.x << " " << cir.y << " " << cir.rad << " " << cir.color << std::endl;
     filledCircleColor(_ren, cir.x, cir.y, cir.rad, cir.color);
   }
 }
@@ -33,7 +34,7 @@ void UIRenderer::_Init(int argc, char **argv) {
   }
 
   //Now create a window with title "Hello World" at 100, 100 on the screen with w:640 h:480 and show it
-  _win = SDL_CreateWindow("Hello World!", 100, 100, 1024, 840, SDL_WINDOW_SHOWN);
+  _win = SDL_CreateWindow("Maradeur's map demo", 100, 100, 1024, 840, SDL_WINDOW_SHOWN);
   //Make sure creating our window went ok
   if (_win == nullptr) {
     std::cout << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
@@ -57,6 +58,7 @@ void UIRenderer::_Init(int argc, char **argv) {
 void UIRenderer::update() {
   drawScene();
   SDL_RenderPresent(_ren);
+  std::cerr << "Rendered!\n";
 }
 
 } // namespace ui

@@ -51,20 +51,23 @@ int main(int argc, char **argv) {
         int x = int(dx * config::PIXEL_DISTANCE / config::LAPTOP_DISTANCE_M + 40);
         int y = int(dy * config::PIXEL_DISTANCE / config::LAPTOP_DISTANCE_M + config::SCREEN_HEIGHT / 2.0);
 
+        std::cerr << "Calculated distance to be: " << dx << " " << dy << " pixelwise: " << x << " " << y << std::endl;
+
         int color;
         double r, g, b;
         if (mac[0] == 'd') {
-          color = 0x00ff00ff;
+          color = 0xff00ffff;
         } else {
           color = 0xff0000ff;
         }
 
-        utils::Circle circle(x, y, 10, color);
+        utils::Circle circle(x, y, 40, color);
         renderer.set(mac, circle);
       }
     }
-    renderer.set("0", utils::Circle(40, config::SCREEN_HEIGHT / 2 - config::LAPTOP_DISTANCE_M / 2, 20, 0x0000ffff));
-    renderer.set("1", utils::Circle(40, config::SCREEN_HEIGHT / 2 + config::LAPTOP_DISTANCE_M / 2, 20, 0x0000ffff));
+    renderer.set("0", utils::Circle(40, config::SCREEN_HEIGHT / 2 - config::PIXEL_DISTANCE / 2, 20, 0xffff0000));
+    renderer.set("1", utils::Circle(40, config::SCREEN_HEIGHT / 2 + config::PIXEL_DISTANCE / 2, 20, 0xffff0000));
+
     renderer.update();
   }
 

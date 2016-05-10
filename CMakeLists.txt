@@ -18,3 +18,8 @@ target_link_libraries(Server
   "-framework GLUT"
 )
 
+add_executable(Sniffer sniffer.cpp)
+target_link_libraries(Sniffer
+  SimpleAmqpClient
+  tins
+)

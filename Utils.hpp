@@ -30,7 +30,7 @@ struct Circle {
   int x;
   int y;
   int rad;
-  int color;
+  unsigned int color;
 };
 
 static void intersect(double r0, double r1, double *dx, double *dy) {
@@ -66,7 +66,7 @@ class TimeAverager {
   }
 
   bool get(const std::string &mac, double *val) {
-    if (_mapping.count(mac)) {
+    if (!_mapping.count(mac)) {
       return false;
     }
     *val = _tot_sum[mac] / _mapping[mac].size();

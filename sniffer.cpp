@@ -62,7 +62,6 @@ bool callback(const PDU &pdu) {
     std::string target_a = "38:71:de:4c:84:2d";
     std::string target_b = "d0:22:be:65:f4:a9";
     if (src == target_a || src == target_b) {
-      std::cerr << "Here!!!\n";
       double distance = SignalToDistanceMeters(strength, freq);
 
       std::string msg_str = LAPTOP_ID + SEP +
@@ -88,7 +87,7 @@ bool callback(const PDU &pdu) {
 }
 
 int main() {
-  std::string broker_address = "18.111.117.170";
+  std::string broker_address = "127.0.0.1";//18.111.117.170";
   channel = AmqpClient::Channel::Create(broker_address, 5672, "a", "a");
   channel->DeclareQueue("6.857", true);
   channel->BindQueue("6.857", "amq.direct", "key");
