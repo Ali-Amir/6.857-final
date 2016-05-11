@@ -17,14 +17,15 @@ int main(int argc, char **argv) {
   utils::TimeAverager X, Y;
 
   std::string broker_uri = "";
-  Channel::ptr_t channel;
-  channel = Channel::Create(broker_uri, 5672, "a", "a");
+  Channel::ptr_t channel[2];
+  channel[0] = Channel::Create(broker_uri, 5672, "a", "a");
+  channel[1] = Channel::Create(broker_uri, 5672, "a", "a");
 
+  channel[0]->BasicConsume("6.857-0", "consumertag-0");
+  channel[1]->BasicConsume("6.857-1", "consumertag-1");
   while (true) {
     for (int channel_id = 0; channel_id < 2; ++channel_id) {
-      channel->BasicConsume("6.857-" + std::to_string(channel_id), "consumertag");
-
-      BasicMessage::ptr_t msg_out = channel->BasicConsumeMessage("consumertag")->Message();
+      BasicMessage::ptr_t msg_out = channel[channel_id]->BasicConsumeMessage("consumertag-" + std::to_string(channel_id))->Message();
       const std::string msg = msg_out->Body();
 
       std::cout << "Message text: " << msg << std::endl;
@@ -32,6 +33,7 @@ int main(int argc, char **argv) {
       boost::split(tokens, msg, boost::is_any_of("|"));
 
       // Extract message details.
+      assert(std::stoi(tokens[0]) == channel_id);
       const std::string mac = tokens[1];
       const utils::Notification notif(std::stod(tokens[2]), std::stod(tokens[3]));
 

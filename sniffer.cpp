@@ -70,7 +70,7 @@ bool callback(const PDU &pdu) {
                             std::to_string((boost::posix_time::second_clock::local_time()-epoch).total_milliseconds());
 
       msg_in->Body(msg_str);
-      channel->BasicPublish("amq.direct", "key", msg_in);
+      channel->BasicPublish("amq.direct", LAPTOP_ID, msg_in);
 
       std::cout << src << " -> " << dst
                 << " signal: " << strength
@@ -90,7 +90,7 @@ int main() {
   std::string broker_address = "127.0.0.1";//18.111.117.170";
   channel = AmqpClient::Channel::Create(broker_address, 5672, "a", "a");
   channel->DeclareQueue("6.857-" + LAPTOP_ID, true);
-  channel->BindQueue("6.857-" + LAPTOP_ID, "amq.direct", "key");
+  channel->BindQueue("6.857-" + LAPTOP_ID, "amq.direct", LAPTOP_ID);
   msg_in = AmqpClient::BasicMessage::Create();
 
   SnifferConfiguration config;

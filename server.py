@@ -112,9 +112,14 @@ def ui_update(ts):
 ######################
 credentials = pika.PlainCredentials('a', 'a')
 connection = pika.BlockingConnection(pika.ConnectionParameters(
-        host='18.111.117.170', credentials = credentials))
+        host='127.0.0.1', credentials = credentials))
 channel = connection.channel()
-channel.queue_declare(queue='6.857', durable=True)
+args = {"x-max-length":1}
+channel.queue_delete(queue='6.857-0')
+channel.queue_delete(queue='6.857-1')
+channel.queue_declare(queue='6.857-0', durable=True, arguments=args)
+channel.queue_declare(queue='6.857-1', durable=True, arguments=args)
+asd
 
 def callback(ch, method, properties, body):
     #print " [x] Received %r" % (body,)
