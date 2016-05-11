@@ -2,6 +2,7 @@
 #define __UTILS_HPP__
 
 #include <algorithm>
+#include <iostream>
 #include <string>
 #include <cmath>
 #include <deque>
@@ -12,7 +13,7 @@ namespace config {
 
 const int SCREEN_WIDTH = 1024;
 const int SCREEN_HEIGHT = 860;
-const double LAPTOP_DISTANCE_M = 2.5;
+const double LAPTOP_DISTANCE_M = 6.0;
 const double PIXEL_DISTANCE = 200;
 const double AVERAGE_TIME_WINDOW_MS = 3000.0;
 
@@ -34,13 +35,29 @@ struct Circle {
 };
 
 static void intersect(double r0, double r1, double *dx, double *dy) {
+  std::cerr << "Estimating position intersection for r0: " << r0 << " r1: " << r1 << std::endl;
   double l = config::LAPTOP_DISTANCE_M;
-  double add = std::max(0.0, (l - r0 - r1)/2.0);
-  r0 += add;
-  r1 += add;
+  if (l > r0 + r1) {
+    double dr = (l - r0 - r1)/2.0;
+    r0 += dr;
+    r1 += dr;
+  } else if (r0 > l + r1) {
+    double dr = (r0 - l - r1)/2.0;
+    r0 -= dr;
+    r1 += dr;
+  } else if (r1 > l + r0) {
+    double dr = (r1 - l - r0)/2.0;
+    r0 += dr;
+    r1 -= dr;
+  }
 
-  *dx = sqrt(std::max(0.0, std::pow(r0, 2.0) - std::pow(std::pow(r1, 2.0) - std::pow(r0, 2.0) - std::pow(l, 2.0), 2.0) / std::pow(2*l, 2.0)));
-  *dy = l/2.0 - sqrt(std::pow(r1, 2.0) - std::pow(*dx, 2.0));
+  double A = 0.0, B = 2 * l, C = l*l + r0*r0 - r1*r1;
+  double d = sqrt(std::max(0.0, r0*r0 - C*C/(A*A+B*B)));
+  double mult = sqrt(d*d / (A*A + B*B));
+
+  *dx = 0.0 + B * mult;
+  *dy = -B*C/(A*A + B*B) - A*mult + l/2.0;
+  std::cerr << "Estimated: " << *dx << " " << *dy << " r0: " << r0 << " r1: " << r1 << std::endl;
 }
 
 struct Notification {
@@ -66,7 +83,8 @@ class TimeAverager {
   }
 
   bool get(const std::string &mac, double *val) {
-    if (!_mapping.count(mac)) {
+    relax(mac);
+    if (!_mapping.count(mac) || _mapping[mac].empty()) {
       return false;
     }
     *val = _tot_sum[mac] / _mapping[mac].size();
@@ -108,6 +126,10 @@ static void CalculatePositionEstimates(TimeAverager R[2], TimeAverager *X, TimeA
   for (const auto &mac : macs) {
     // Ensure that we have measurements from both to proceed.
     double r0, r1;
+    double dx, dy;
+    // Drop unnecessary packets.
+    X->get(mac, &dx);
+    Y->get(mac, &dy);
     if (!R[0].get(mac, &r0)) {
       continue;
     }
@@ -116,7 +138,6 @@ static void CalculatePositionEstimates(TimeAverager R[2], TimeAverager *X, TimeA
     }
 
     // Update position estimates.
-    double dx, dy;
     intersect(r0, r1, &dx, &dy);
     X->add(mac, Notification(dx, ts));
     Y->add(mac, Notification(dy, ts));

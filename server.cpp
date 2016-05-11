@@ -25,6 +25,7 @@ int main(int argc, char **argv) {
   channel[1]->BasicConsume("6.857-1", "consumertag-1");
   while (true) {
     for (int channel_id = 0; channel_id < 2; ++channel_id) {
+      //channel->BasicConsume("6.857-" + std::to_string(channel_id), "consumertag-" + std::to_string(channel_id));
       BasicMessage::ptr_t msg_out = channel[channel_id]->BasicConsumeMessage("consumertag-" + std::to_string(channel_id))->Message();
       const std::string msg = msg_out->Body();
 
@@ -39,6 +40,9 @@ int main(int argc, char **argv) {
 
       // Update one of the radii.
       R[channel_id].add(mac, notif);
+
+      // Update timestamp.
+      utils::LAST_TS = std::max(utils::LAST_TS, notif.ts);
 
       // Recalculate position estimates.
       utils::CalculatePositionEstimates(R, &X, &Y, notif.ts);
@@ -60,7 +64,8 @@ int main(int argc, char **argv) {
         int color;
         double r, g, b;
         if (mac[0] == 'd') {
-          color = 0xff00ffff;
+          //color = 0xff00ffff;
+          color = 0xff0000ff;
         } else {
           color = 0xff0000ff;
         }
