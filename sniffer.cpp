@@ -64,10 +64,7 @@ bool callback(const PDU &pdu) {
 
     std::string target_a = "38:71:de:4c:84:2d";
     std::string target_b = "d0:22:be:65:f4:a9";
-    if (dst == "58:f3:9c:e1:30:bd") {
-      return true;
-    }
-    if (src == target_a || src == target_b) {
+    if (dst == target_a || dst == target_b) {
       ave = strength * 0.8 + ave * 0.2;
       double distance = SignalToDistanceMeters(strength, freq);
 
