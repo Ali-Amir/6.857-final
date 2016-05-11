@@ -89,8 +89,8 @@ bool callback(const PDU &pdu) {
 int main() {
   std::string broker_address = "127.0.0.1";//18.111.117.170";
   channel = AmqpClient::Channel::Create(broker_address, 5672, "a", "a");
-  channel->DeclareQueue("6.857", true);
-  channel->BindQueue("6.857", "amq.direct", "key");
+  channel->DeclareQueue("6.857-" + LAPTOP_ID, true);
+  channel->BindQueue("6.857-" + LAPTOP_ID, "amq.direct", "key");
   msg_in = AmqpClient::BasicMessage::Create();
 
   SnifferConfiguration config;

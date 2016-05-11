@@ -20,25 +20,27 @@ int main(int argc, char **argv) {
   Channel::ptr_t channel;
   channel = Channel::Create(broker_uri, 5672, "a", "a");
 
-  channel->BasicConsume("6.857", "consumertag");
   while (true) {
-    BasicMessage::ptr_t msg_out = channel->BasicConsumeMessage("consumertag")->Message();
-    const std::string msg = msg_out->Body();
+    for (int channel_id = 0; channel_id < 2; ++channel_id) {
+      channel->BasicConsume("6.857-" + std::to_string(channel_id), "consumertag");
 
-    std::cout << "Message text: " << msg << std::endl;
-    std::vector<std::string> tokens;
-    boost::split(tokens, msg, boost::is_any_of("|"));
+      BasicMessage::ptr_t msg_out = channel->BasicConsumeMessage("consumertag")->Message();
+      const std::string msg = msg_out->Body();
 
-    // Extract message details.
-    const int rid = std::stoi(tokens[0]);
-    const std::string mac = tokens[1];
-    const utils::Notification notif(std::stod(tokens[2]), std::stod(tokens[3]));
+      std::cout << "Message text: " << msg << std::endl;
+      std::vector<std::string> tokens;
+      boost::split(tokens, msg, boost::is_any_of("|"));
 
-    // Update one of the radii.
-    R[rid].add(mac, notif);
+      // Extract message details.
+      const std::string mac = tokens[1];
+      const utils::Notification notif(std::stod(tokens[2]), std::stod(tokens[3]));
 
-    // Recalculate position estimates.
-    utils::CalculatePositionEstimates(R, &X, &Y, notif.ts);
+      // Update one of the radii.
+      R[channel_id].add(mac, notif);
+
+      // Recalculate position estimates.
+      utils::CalculatePositionEstimates(R, &X, &Y, notif.ts);
+    }
 
     const auto &macsX = X.keys();
     const auto &macsY = Y.keys();
