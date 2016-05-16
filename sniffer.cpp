@@ -66,7 +66,7 @@ bool callback(const PDU &pdu) {
     std::string target_b = "d0:22:be:65:f4:a9";
     if (src == target_a) {
       ave = strength * 0.8 + ave * 0.2;
-      double distance = SignalToDistanceMeters(strength, freq);
+      double distance = SignalToDistanceMeters(ave, freq);
 
       std::string msg_str = LAPTOP_ID + SEP +
                             src + SEP +

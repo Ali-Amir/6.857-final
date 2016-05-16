@@ -104,7 +104,8 @@ class TimeAverager {
   void relax(const std::string &mac) {
     for (; !_mapping[mac].empty();) {
       const Notification notif = _mapping[mac].front();
-      if (LAST_TS - notif.ts > config::AVERAGE_TIME_WINDOW_MS) {
+      //if (LAST_TS - notif.ts > config::AVERAGE_TIME_WINDOW_MS) {
+      if (_mapping[mac].size() > 10) {
         _tot_sum[mac] -= notif.val;
         _mapping[mac].pop_front();
       } else {
